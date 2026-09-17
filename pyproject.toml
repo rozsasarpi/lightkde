@@ -1,10 +1,79 @@
 [build-system]
-requires = ["setuptools>=34.4", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lightkde"
+dynamic = ["version"]
+description = "Lightning fast, lightweight, and reliable kernel density estimation."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Arpad Rozsas", email = "rozsasarpi@gmail.com" }]
+requires-python = ">=3.10"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy",
+    "scipy",
+]
+
+[project.urls]
+Homepage = "https://github.com/rozsasarpi/lightkde"
+Documentation = "https://lightkde.readthedocs.io/en/stable/"
+Changelog = "https://github.com/rozsasarpi/lightkde/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+tests = [
+    "matplotlib<4",
+    "pytest",
+    "coverage[toml]",
+]
+lint-type-checks = [
+    "pre-commit",
+]
+docs = [
+    "matplotlib<4",
+    "sphinx>=7,<9",
+    "sphinx_gallery",
+    "sphinx-copybutton",
+    "sphinx-inline-tabs",
+    "sphinxcontrib-bibtex",
+    "myst-parser",
+    "furo",
+]
+
+[tool.hatch.version]
+path = "lightkde/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["lightkde"]
 
 [tool.semantic_release]
-version_variable = ["lightkde/__init__.py:__version__"]
-branch = "main"
+version_variables = ["lightkde/__init__.py:__version__"]
+build_command = "uv build"
+
+[tool.semantic_release.branches.main]
+match = "main"
+
+[tool.semantic_release.remote]
+type = "github"
 
 [tool.coverage.run]
 source = ["lightkde"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C90", "B", "I", "UP"]
+
+[tool.mypy]
+ignore_missing_imports = true

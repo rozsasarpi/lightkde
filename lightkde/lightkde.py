@@ -24,16 +24,21 @@ TODO:
 
 import copy
 import logging
-from typing import Iterable, Optional, Tuple, Union
+from collections.abc import Iterable
 
 import numpy as np
 from scipy import fft, optimize
 from scipy.stats import gaussian_kde
 
-# ``np.trapz`` was renamed to ``np.trapezoid`` in numpy 2.0 and removed in later numpy
-# 2.x releases; ``np.trapezoid`` does not exist before numpy 1.24. This keeps both
-# bounds working.
-_trapezoid = getattr(np, "trapezoid", None) or np.trapz
+
+def _trapezoid(y: np.ndarray, x: np.ndarray) -> np.ndarray:
+    """``np.trapz`` was renamed to ``np.trapezoid`` in numpy 2.0 and removed in later
+    numpy 2.x releases; ``np.trapezoid`` does not exist before numpy 1.24. This keeps
+    both bounds working."""
+    fn = getattr(np, "trapezoid", None) or getattr(np, "trapz", None)
+    assert fn is not None
+    return fn(y, x)
+
 
 N_X_VEC = int(2**14)
 N_ROW_MX = int(2**8)
@@ -43,13 +48,13 @@ N_ROW_MX = int(2**8)
 # 1D
 # ======================================================================================
 def kde_1d(
-    sample_vec: Union[np.ndarray, list],
+    sample_vec: np.ndarray | list,
     n_x_vec: int = N_X_VEC,
-    x_min: Optional[Union[int, float]] = None,
-    x_max: Optional[Union[int, float]] = None,
-    weight_vec: Union[np.ndarray, list] = None,
+    x_min: int | float | None = None,
+    x_max: int | float | None = None,
+    weight_vec: np.ndarray | list | None = None,
     return_bandwidth: bool = False,
-) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray, float]]:
+) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, float]:
     """
     Reliable and extremely fast kernel density estimator for one-dimensional sample.
 
@@ -145,10 +150,12 @@ def kde_1d(
         [1] Z. I. Botev, J. F. Grotowski, and D. P. Kroese (2010) Annals of
         Statistics, Volume 38, Number 5, pages 2916-2957.
 
-        [2] https://github.com/Daniel-B-Smith/KDE-for-SciPy/blob/a9982909bbb92a7e243e5fc9a74f957d883f1c5d/kde.py # noqa: E501
+        [2] https://github.com/Daniel-B-Smith/KDE-for-SciPy/blob/
+        a9982909bbb92a7e243e5fc9a74f957d883f1c5d/kde.py
         Updated on: 6 Feb 2013.
 
-        [3] https://nl.mathworks.com/matlabcentral/fileexchange/14034-kernel-density-estimator # noqa: E501
+        [3] https://nl.mathworks.com/matlabcentral/fileexchange/
+        14034-kernel-density-estimator
         Updated on: 30 Dec 2015.
     """
     sample_vec = np.array(sample_vec).ravel()
@@ -157,8 +164,8 @@ def kde_1d(
     # Parameters to set up the x_vec on which to calculate
     n_x_vec = int(2 ** np.ceil(np.log2(n_x_vec)))
     if x_min is None or x_max is None:
-        sample_min = np.min(sample_vec)
-        sample_max = np.max(sample_vec)
+        sample_min = float(np.min(sample_vec))
+        sample_max = float(np.max(sample_vec))
         sample_range = sample_max - sample_min
         x_min = sample_min - sample_range / 10 if x_min is None else x_min
         x_max = sample_max + sample_range / 10 if x_max is None else x_max
@@ -175,7 +182,7 @@ def kde_1d(
 
     # Histogram the sample_vec to get a crude first approximation of the density
     step = x_range / (n_x_vec - 1)
-    x_vec = np.arange(start=x_min, stop=x_max + 0.1 * step, step=step)
+    x_vec = np.arange(x_min, x_max + 0.1 * step, step)
 
     sample_hist, bin_edges = np.histogram(sample_vec, bins=x_vec, weights=weight_vec)
     # for easier comparison with Matlab, the count for [x_vec[-1], +Inf [ is also
@@ -211,7 +218,7 @@ def kde_1d(
 
     # Smooth the DCTransformed sample_vec using t_star
     sm_dct_sample = dct_sample * np.exp(
-        -np.arange(n_x_vec) ** 2 * np.pi**2 * t_star / 2
+        -(np.arange(n_x_vec) ** 2) * np.pi**2 * t_star / 2
     )
     # Inverse DCT to get density
     density_vec = fft.idct(sm_dct_sample, norm=None) / x_range
@@ -252,16 +259,16 @@ def fixed_point(t, n_sample, ic, sq_dct_sample):
 # 2D
 # ======================================================================================
 def kde_2d(
-    sample_mx: Union[np.ndarray, list],
+    sample_mx: np.ndarray | list,
     n_row_mx: int = N_ROW_MX,
-    xy_min: Union[np.ndarray, Iterable] = None,
-    xy_max: Union[np.ndarray, Iterable] = None,
-    weight_vec: Union[np.ndarray, list] = None,
+    xy_min: np.ndarray | Iterable | None = None,
+    xy_max: np.ndarray | Iterable | None = None,
+    weight_vec: np.ndarray | list | None = None,
     return_bandwidth: bool = False,
-) -> Union[
-    Tuple[np.ndarray, np.ndarray, np.ndarray],
-    Tuple[np.ndarray, np.ndarray, np.ndarray, float],
-]:
+) -> (
+    tuple[np.ndarray, np.ndarray, np.ndarray]
+    | tuple[np.ndarray, np.ndarray, np.ndarray, float]
+):
     """
     Fast and accurate state-of-the-art bivariate kernel density estimator with
     diagonal bandwidth matrix.
@@ -325,7 +332,8 @@ def kde_2d(
         [1] Z. I. Botev, J. F. Grotowski, and D. P. Kroese (2010) Annals of
         Statistics, Volume 38, Number 5, pages 2916-2957.
 
-        [2] https://nl.mathworks.com/matlabcentral/fileexchange/17204-kernel-density-estimation.  # noqa: E501
+        [2] https://nl.mathworks.com/matlabcentral/fileexchange/
+        17204-kernel-density-estimation.
         Updated on: 30 Dec 2015.
     """
 
@@ -369,7 +377,7 @@ def kde_2d(
     a = dct2d(initial_sample)
 
     # compute the optimal bandwidth**2
-    ic = np.arange(start=0, stop=n_row_mx, step=1, dtype=float) ** 2
+    ic = np.arange(0.0, float(n_row_mx), 1.0, dtype=float) ** 2
     ac2 = a**2
     t_star = root(
         lambda t: t - evolve(t, n_sample=n_sample, ic=ic, ac2=ac2)[0], n=n_sample
@@ -400,10 +408,10 @@ def kde_2d(
     density_mx = idct2d(a_t) * (a_t.size / np.prod(scaling))
     # remove any negative density values
     density_mx[density_mx < 0] = np.finfo(float).eps
-    x_step = scaling[0] / (n_row_mx - 1)
-    y_step = scaling[1] / (n_row_mx - 1)
-    x_vec = np.arange(start=xy_min[0], stop=xy_max[0] + 0.1 * x_step, step=x_step)
-    y_vec = np.arange(start=xy_min[1], stop=xy_max[1] + 0.1 * y_step, step=y_step)
+    x_step = float(scaling[0]) / (n_row_mx - 1)
+    y_step = float(scaling[1]) / (n_row_mx - 1)
+    x_vec = np.arange(float(xy_min[0]), float(xy_max[0]) + 0.1 * x_step, x_step)
+    y_vec = np.arange(float(xy_min[1]), float(xy_max[1]) + 0.1 * y_step, y_step)
     x_mx, y_mx = np.meshgrid(x_vec, y_vec)
     bandwidth = np.sqrt([t_x, t_y]) * scaling
 
@@ -455,7 +463,7 @@ def psi(s, time, ic, ac2):
 
 def k_fun(s):
     step = 2
-    idx = np.arange(start=1, stop=2 * s - 1 + 0.1 * step, step=step)
+    idx = np.arange(1, 2 * s - 1 + 0.1 * step, step)
     return (-1) ** s * np.prod(idx) / np.sqrt(2 * np.pi)
 
 
@@ -475,7 +483,9 @@ def idct2d(sample):
     return t_sample
 
 
-def hist_2d(sample_mx, n_bin, weight_vec: Union[np.ndarray, list] = None) -> np.ndarray:
+def hist_2d(
+    sample_mx, n_bin, weight_vec: np.ndarray | list | None = None
+) -> np.ndarray:
     """
     Computes the histogram of a 2-dimensional sample (two columns, n rows).
 
