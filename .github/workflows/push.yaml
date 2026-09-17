@@ -131,6 +131,10 @@ jobs:
         run: |
           uvx --with uv --from "python-semantic-release==10.6.2" semantic-release version
       - name: Attach the built distributions to the GitHub release
+        # non-fatal: re-running for a version whose assets are already attached fails
+        # with an HTTP 422 (duplicate asset name), which must not block the PyPI
+        # publish step below
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
