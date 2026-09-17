@@ -24,8 +24,8 @@ pip install .
 
 ````{tab} Developer
 ```bash
-pip install -e .[tests,lint_type_checks,docs]
+pip install -e .[tests,lint-type-checks,docs]
 ```
 ````
 
-[repository]: https://github.com/TNO/lightkde
+[repository]: https://github.com/rozsasarpi/lightkde
