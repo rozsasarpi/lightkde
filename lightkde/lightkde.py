@@ -30,6 +30,11 @@ import numpy as np
 from scipy import fft, optimize
 from scipy.stats import gaussian_kde
 
+# ``np.trapz`` was renamed to ``np.trapezoid`` in numpy 2.0 and removed in later numpy
+# 2.x releases; ``np.trapezoid`` does not exist before numpy 1.24. This keeps both
+# bounds working.
+_trapezoid = getattr(np, "trapezoid", None) or np.trapz
+
 N_X_VEC = int(2**14)
 N_ROW_MX = int(2**8)
 
@@ -212,7 +217,7 @@ def kde_1d(
     density_vec = fft.idct(sm_dct_sample, norm=None) / x_range
     bandwidth = np.sqrt(t_star) * x_range
 
-    density_vec = density_vec / np.trapz(density_vec, x_vec)
+    density_vec = density_vec / _trapezoid(density_vec, x_vec)
 
     if return_bandwidth:
         return density_vec, x_vec, bandwidth
@@ -328,8 +333,8 @@ def kde_2d(
 
     if sample_mx.shape[1] != 2:
         raise ValueError(
-            f"``sample_vec`` should have exactly two columns but your input has:"
-            f" {sample_mx.shape[1]}."
+            f"``sample_vec`` should have exactly two columns but your input has: "
+            f"{sample_mx.shape[1]}."
         )
 
     n_row_mx = int(2 ** np.ceil(np.log2(n_row_mx)))
