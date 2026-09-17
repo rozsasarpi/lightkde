@@ -1,13 +1,13 @@
 # This workflow runs on
 #  * a `push` to any branch
-#  * a schedule to check compatibility with potentially updated dependencies
+#  * a monthly schedule to check compatibility with potentially updated dependencies
 
 name: CI
 
 on:
   push:
   schedule:
-    - cron: '0 1 * * 6'  # weekly run at 01:00 UTC on Saturday
+    - cron: '0 1 1 * *'  # monthly run at 01:00 UTC on the 1st
 
 jobs:
   # Known-vulnerability scan of the dependency tree
