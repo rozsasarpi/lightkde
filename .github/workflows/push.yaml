@@ -8,6 +8,7 @@ on:
   push:
   schedule:
     - cron: '0 1 1 * *'  # monthly run at 01:00 UTC on the 1st
+  workflow_dispatch:  # manual retry, e.g. re-publish the current version to PyPI
 
 jobs:
   # Known-vulnerability scan of the dependency tree
@@ -118,6 +119,12 @@ jobs:
       - uses: astral-sh/setup-uv@v10.1.0
         with:
           python-version: "3.12"
+      - name: Build the current version
+        # always build, even when no new version is cut this run -- this is what lets
+        # a manual workflow_dispatch retry a PyPI publish for the current tag without
+        # needing a new commit; semantic-release's own build_command only runs when it
+        # actually bumps something
+        run: uv build
       - name: Bump version, changelog, tag, and build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
