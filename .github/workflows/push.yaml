@@ -13,7 +13,7 @@ jobs:
   # Lint and type checking
   lint_and_type_check:
     name: Lint and type check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v3
@@ -31,7 +31,7 @@ jobs:
   # Unit test and coverage
   test:
     name: Test on Python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         python-version: [ '3.7', '3.8', '3.9', '3.10', '3.11' ]
