@@ -5,6 +5,7 @@
 This example shows how to use ``lightkde.kde_2d`` and how it compares to
 ``scipy.stats.gaussian_kde`` for a bimodal bivariate case.
 """
+
 # %%
 # Import packages:
 import matplotlib.pyplot as plt

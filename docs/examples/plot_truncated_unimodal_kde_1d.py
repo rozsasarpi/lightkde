@@ -5,6 +5,7 @@
 This example shows how to use ``lightkde.kde_1d`` with and without a limit and
 how it compares to ``scipy.stats.gaussian_kde`` for a truncated unimodal distribution.
 """
+
 # %%
 # Import packages
 import matplotlib.pyplot as plt

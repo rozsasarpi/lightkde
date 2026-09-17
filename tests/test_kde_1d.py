@@ -1,6 +1,7 @@
-""""
+""" "
 Some tests compare the results against the results from Botev's Matlab implementation:
- * `kde.m`: https://mathworks.com/matlabcentral/fileexchange/14034-kernel-density-estimator  # noqa E501
+ * `kde.m`: https://mathworks.com/matlabcentral/fileexchange/
+   14034-kernel-density-estimator
 
 np.testing.assert_allclose
 atol + rtol * abs(desired)
@@ -10,6 +11,7 @@ TODO:
         solve the potential problem of the mismatch of meshes, to be added later.
     * extend tests to cover branches.
 """
+
 import logging
 import os
 
