@@ -122,12 +122,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          uvx --with uv "python-semantic-release==10.6.2" semantic-release version
+          uvx --with uv --from "python-semantic-release==10.6.2" semantic-release version
       - name: Attach the built distributions to the GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          uvx --with uv "python-semantic-release==10.6.2" semantic-release publish
+          uvx --with uv --from "python-semantic-release==10.6.2" semantic-release publish
       - name: Publish to PyPI
         if: hashFiles('dist/*') != ''
         uses: pypa/gh-action-pypi-publish@v1.14.2
