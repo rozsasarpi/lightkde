@@ -1,3 +1,5 @@
+default_install_hook_types: [pre-commit, commit-msg]
+
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v5.0.0
@@ -22,3 +24,11 @@ repos:
       pass_filenames: false
       args: ['lightkde']
       additional_dependencies: ['numpy']
+
+- repo: local
+  hooks:
+    - id: no-ai-attribution
+      name: block AI attribution in commit messages
+      entry: .githooks/check-ai-attribution.sh
+      language: script
+      stages: [commit-msg]
