@@ -120,10 +120,15 @@ jobs:
         with:
           python-version: "3.12"
       - name: Build the current version
-        # always build, even when no new version is cut this run -- this is what lets
-        # a manual workflow_dispatch retry a PyPI publish for the current tag without
-        # needing a new commit; semantic-release's own build_command only runs when it
-        # actually bumps something
+        # only for a manual retry: this lets workflow_dispatch re-publish the current
+        # tag to PyPI without a new commit. On an ordinary push, semantic-release's own
+        # build_command (below) is the only thing that should populate dist/ -- it only
+        # runs when a new version is actually cut, so an unconditional build here would
+        # leave dist/ populated with the *already-published* current version on every
+        # push that doesn't release anything (e.g. a dependabot chore commit), and the
+        # publish step below would then always retry uploading it, which PyPI rejects
+        # with "File already exists".
+        if: github.event_name == 'workflow_dispatch'
         run: uv build
       - name: Bump version, changelog, tag, and build
         env:
