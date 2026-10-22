@@ -90,7 +90,8 @@ jobs:
           echo "BRANCH_NAME=$(echo $BRANCH_NAME)" >> $GITHUB_ENV
 
       # Upload the coverage value to gist only once
-      - if: ${{ matrix.python-version == '3.12' }}
+      # dependabot runs get no repository secrets
+      - if: ${{ matrix.python-version == '3.12' && github.actor != 'dependabot[bot]' }}
         name: Upload coverage to gist
         uses: schneegans/dynamic-badges-action@v1.9.0
         with:
