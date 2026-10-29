@@ -147,4 +147,4 @@ jobs:
           uvx --with uv --from "python-semantic-release==10.6.2" semantic-release publish
       - name: Publish to PyPI
         if: hashFiles('dist/*') != ''
-        uses: pypa/gh-action-pypi-publish@v1.14.2
+        uses: pypa/gh-action-pypi-publish@v1.14.3
